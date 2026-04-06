@@ -6,7 +6,14 @@ export async function POST(request: Request) {
   const { pathname } = new URL(request.url);
   const endpoint = pathname;
   
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
+  }
+  
+  console.log(`[API Proxy] POST ${endpoint}`, body);
   
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "POST",
@@ -17,12 +24,15 @@ export async function POST(request: Request) {
   });
 
   const data = await response.json();
+  console.log(`[API Proxy] Response:`, response.status, data);
   return NextResponse.json(data, { status: response.status });
 }
 
 export async function GET(request: Request) {
   const { pathname, search } = new URL(request.url);
   const endpoint = pathname + search;
+  
+  console.log(`[API Proxy] GET ${endpoint}`);
   
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "GET",
@@ -32,6 +42,7 @@ export async function GET(request: Request) {
   });
 
   const data = await response.json();
+  console.log(`[API Proxy] Response:`, response.status, data);
   return NextResponse.json(data, { status: response.status });
 }
 
@@ -39,7 +50,14 @@ export async function PUT(request: Request) {
   const { pathname } = new URL(request.url);
   const endpoint = pathname;
   
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
+  }
+  
+  console.log(`[API Proxy] PUT ${endpoint}`, body);
   
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "PUT",
@@ -50,12 +68,15 @@ export async function PUT(request: Request) {
   });
 
   const data = await response.json();
+  console.log(`[API Proxy] Response:`, response.status, data);
   return NextResponse.json(data, { status: response.status });
 }
 
 export async function DELETE(request: Request) {
   const { pathname } = new URL(request.url);
   const endpoint = pathname;
+  
+  console.log(`[API Proxy] DELETE ${endpoint}`);
   
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "DELETE",
@@ -65,5 +86,6 @@ export async function DELETE(request: Request) {
   });
 
   const data = await response.json();
+  console.log(`[API Proxy] Response:`, response.status, data);
   return NextResponse.json(data, { status: response.status });
 }
