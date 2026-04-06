@@ -4,7 +4,7 @@ const API_BASE = "https://pashardokan-api.onrender.com";
 
 export async function POST(request: Request) {
   const { pathname } = new URL(request.url);
-  const endpoint = pathname.replace("/api", "");
+  const endpoint = pathname;
   
   const body = await request.json();
   
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   const { pathname, search } = new URL(request.url);
-  const endpoint = pathname.replace("/api", "") + search;
+  const endpoint = pathname + search;
   
   const response = await fetch(`${API_BASE}${endpoint}`);
   const data = await response.json();
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   const { pathname } = new URL(request.url);
-  const endpoint = pathname.replace("/api", "");
+  const endpoint = pathname;
   
   const body = await request.json();
   
@@ -45,7 +45,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   const { pathname } = new URL(request.url);
-  const endpoint = pathname.replace("/api", "");
+  const endpoint = pathname;
   
   const response = await fetch(`${API_BASE}${endpoint}`, { method: "DELETE" });
   const data = await response.json();

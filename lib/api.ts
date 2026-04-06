@@ -1,4 +1,4 @@
-const API_BASE = "";
+const API_BASE = "/api";
 
 interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
