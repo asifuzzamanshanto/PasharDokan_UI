@@ -1,4 +1,4 @@
-const API_BASE = "https://pashardokan-api.onrender.com";
+const API_BASE = "/api/proxy";
 
 interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
