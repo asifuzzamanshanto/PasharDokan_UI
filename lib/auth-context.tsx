@@ -15,9 +15,11 @@ interface AuthUser {
   email: string;
   isAuthenticated: boolean;
   name?: string;
+  phone?: string;
   role?: string;
   shopId?: number;
   shopStatus?: string;
+  shopName?: string;
 }
 
 interface AuthContextType {
@@ -26,6 +28,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  hasPermission: (permission: string) => boolean;
+  canAccessShop: (status?: string, path?: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,9 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userId: me.userId,
           email: me.email,
           isAuthenticated: true,
+          phone: undefined,
           role: context.ctx?.role,
           shopId: context.ctx?.shopId,
           shopStatus: context.ctx?.shopStatus,
+          shopName: context.ctx?.shopName,
         });
       }
     } catch (error) {
@@ -73,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      const result = await clientApi.auth.login({ email, password });
+      const result = await (clientApi.auth.login as any)({ email, password });
       if (result.ok) {
         const me = await clientApi.auth.me();
         const context = await clientApi.shop.context();
@@ -82,9 +88,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userId: me.userId,
           email: me.email,
           isAuthenticated: true,
+          phone: undefined,
           role: context.ctx?.role,
           shopId: context.ctx?.shopId,
           shopStatus: context.ctx?.shopStatus,
+          shopName: context.ctx?.shopName,
         };
         
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: userData }));
@@ -109,9 +117,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const hasPermission = useCallback((permission: string): boolean => {
+    if (!user) return false;
+    const role = user.role;
+    const permissions: Record<string, string[]> = {
+      platform_admin: ["manage_shops", "manage_users", "view_analytics", "manage_products", "manage_inventory", "manage_sales", "manage_dues"],
+      owner: ["manage_products", "manage_inventory", "manage_sales", "manage_dues", "manage_users", "view_analytics"],
+      manager: ["manage_products", "manage_inventory", "manage_sales", "manage_dues", "view_analytics"],
+      seller: ["view_products", "create_sale", "view_sales"],
+    };
+    return permissions[role || ""]?.includes(permission) || false;
+  }, [user]);
+
+  const canAccessShop = useCallback((status?: string, path?: string): boolean => {
+    if (status && path) {
+      const statusAccess: Record<string, string[]> = {
+        pending: ["/shop/dashboard"],
+        verified: ["/shop/dashboard", "/shop/pos", "/shop/products", "/shop/inventory", "/shop/invoices", "/shop/due", "/shop/reports"],
+        active: ["/shop/dashboard", "/shop/pos", "/shop/products", "/shop/products/new", "/shop/products/:id/edit", "/shop/inventory", "/shop/inventory/stock-in", "/shop/inventory/stock-out", "/shop/inventory/returns", "/shop/inventory/adjustments", "/shop/inventory/history", "/shop/invoices", "/shop/invoices/:id", "/shop/due", "/shop/due/:customerId", "/shop/users", "/shop/reports", "/shop/settings"],
+        suspended: ["/shop/dashboard"],
+      };
+      return statusAccess[status]?.some(p => path.startsWith(p.replace(/:id.*$/, ""))) || false;
+    }
+    if (!user) return false;
+    return user.shopStatus === "active" || user.shopStatus === "verified";
+  }, [user]);
+
   return (
     <AuthContext.Provider
-      value={{ user, hydrated, login, logout, refreshUser }}
+      value={{ user, hydrated, login, logout, refreshUser, hasPermission, canAccessShop }}
     >
       {children}
     </AuthContext.Provider>

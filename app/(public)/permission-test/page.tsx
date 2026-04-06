@@ -92,7 +92,7 @@ export default function PermissionTestPage() {
               </div>
               <div>
                 <p className="text-xs text-text-tertiary">Status</p>
-                <p className="text-sm font-medium text-text-primary">{user?.shopStatus ? SHOP_STATUS_LABELS[user.shopStatus] : "Active"}</p>
+                <p className="text-sm font-medium text-text-primary">{user?.shopStatus ? SHOP_STATUS_LABELS[user.shopStatus as ShopStatus] : "Active"}</p>
               </div>
             </div>
           </Card>

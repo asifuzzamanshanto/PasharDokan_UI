@@ -4,7 +4,7 @@ import { Product, Invoice, DueCustomer, DueTransaction, StockMovement, Shop, Sho
 const MOCK_SHOPS: Shop[] = [
   { id: "s1", name: "Rahim Store", nameBn: "রহিম স্টোর", ownerName: "Rahim Ahmed", ownerPhone: "01712345678", address: "12 Kawran Bazar", city: "Dhaka", tradeLicenseNo: "TRAD-2024-001", status: "active", appliedAt: "2025-06-01", verifiedAt: "2025-06-03", activatedAt: "2025-06-05", staffCount: 4, totalSales: 2_450_000, totalDue: 38_500 },
   { id: "s2", name: "Fatema Grocery", nameBn: "ফাতেমা গ্রোসারি", ownerName: "Fatema Begum", ownerPhone: "01898765432", address: "45 Green Road", city: "Dhaka", tradeLicenseNo: "TRAD-2024-002", status: "active", appliedAt: "2025-07-10", verifiedAt: "2025-07-12", activatedAt: "2025-07-14", staffCount: 2, totalSales: 1_120_000, totalDue: 15_200 },
-  { id: "s3", name: "Karim Bhai Shop", nameBn: "করিম ভাই শপ", ownerName: "Karim Hossain", phone: "01556789012", address: "78 Uttara Sector 4", city: "Dhaka", tradeLicenseNo: "TRAD-2024-003", status: "pending", appliedAt: "2026-03-28", verifiedAt: null, activatedAt: null, staffCount: 0, totalSales: 0, totalDue: 0 },
+  { id: "s3", name: "Karim Bhai Shop", nameBn: "করিম ভাই শপ", ownerName: "Karim Hossain", ownerPhone: "01556789012", address: "78 Uttara Sector 4", city: "Dhaka", tradeLicenseNo: "TRAD-2024-003", status: "pending", appliedAt: "2026-03-28", verifiedAt: null, activatedAt: null, staffCount: 0, totalSales: 0, totalDue: 0 },
   { id: "s4", name: "Shapla Store", nameBn: "শাপলা স্টোর", ownerName: "Nasreen Akter", ownerPhone: "01634567890", address: "22 Mirpur 10", city: "Dhaka", tradeLicenseNo: "TRAD-2024-004", status: "verified", appliedAt: "2026-03-15", verifiedAt: "2026-03-20", activatedAt: null, staffCount: 0, totalSales: 0, totalDue: 0 },
   { id: "s5", name: "Jamal Traders", nameBn: "জামাল ট্রেডার্স", ownerName: "Jamal Uddin", ownerPhone: "01912345678", address: "10 Dhanmondi", city: "Dhaka", tradeLicenseNo: "TRAD-2023-010", status: "suspended", appliedAt: "2025-03-01", verifiedAt: "2025-03-05", activatedAt: "2025-03-07", staffCount: 3, totalSales: 890_000, totalDue: 62_000 },
 ];
@@ -72,13 +72,16 @@ export const mockApi = {
 
   // Shop
   shop: {
-    apply: async (data: { ShopName: string; OwnerName: string; OwnerPhone: string; OwnerEmail: string }) => {
+    apply: async (data: { shopName: string; address: string; ownerName: string; ownerPhone: string; ownerEmail: string }) => {
       await delay(500);
-      return { message: "Application submitted", applicationId: Math.floor(Math.random() * 1000) };
+      return { message: "Application submitted", applicationId: Math.floor(Math.random() * 1000), shopId: 123 };
     },
     context: async () => {
       await delay(200);
-      return { shop: MOCK_SHOPS[0], user: { id: "u1", name: "Rahim Ahmed", role: "owner" } };
+      return { 
+        hasShop: true, 
+        ctx: { shopId: 1, role: "OWNER", shopStatus: "ACTIVE", shopName: "Rahim Store", canCreateDue: true, canCollectDue: true } 
+      };
     },
     getMembers: async () => {
       await delay(200);
@@ -101,9 +104,9 @@ export const mockApi = {
       await delay(200);
       return { product: MOCK_PRODUCTS.find(p => p.id === id) };
     },
-    create: async (data: { Name: string; Barcode: string; SellPricePaisa: number }) => {
+    create: async (data: { name: string; sku: string; sellPrice: number; costPrice?: number; category?: string; unit?: string; lowStockThreshold?: number }) => {
       await delay(300);
-      const newProduct = { id: `p${Date.now()}`, ...data, shopId: "s1", stock: 0, isActive: true };
+      const newProduct = { id: `p${Date.now()}`, shopId: "s1", name: data.name, nameBn: data.name, sku: data.sku, category: data.category || "General", unit: data.unit || "pc", costPrice: data.costPrice || 0, sellPrice: data.sellPrice, stock: 0, lowStockThreshold: data.lowStockThreshold || 10, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
       return { product: newProduct, message: "Product created" };
     },
     update: async (id: string, data: Partial<Product>) => {
@@ -130,22 +133,21 @@ export const mockApi = {
       await delay(200);
       return { sale: MOCK_INVOICES.find(i => i.id === id) };
     },
-    create: async (data: { Items: { ProductId: string; Qty: number }[]; PaidAmount?: number; CustomerName?: string; CustomerPhone?: string; Discount?: number }) => {
+    create: async (data: { items: { productId: number; qty: number }[] }) => {
       await delay(300);
-      const items = data.Items.map(item => {
-        const product = MOCK_PRODUCTS.find(p => p.id === item.ProductId);
-        return { productId: item.ProductId, productName: product?.name || "Unknown", quantity: item.Qty, unitPrice: product?.sellPrice || 0, total: (product?.sellPrice || 0) * item.Qty };
+      const items = data.items.map(item => {
+        const product = MOCK_PRODUCTS.find(p => p.id === String(item.productId));
+        return { productId: String(item.productId), productName: product?.name || "Unknown", quantity: item.qty, unitPrice: product?.sellPrice || 0, total: (product?.sellPrice || 0) * item.qty };
       });
       const subtotal = items.reduce((s, i) => s + i.total, 0);
-      const discount = data.Discount || 0;
-      const total = subtotal - discount;
-      const paidAmount = data.PaidAmount ?? total;
-      const dueAmount = total - paidAmount;
+      const total = subtotal;
+      const paidAmount = total;
+      const dueAmount = 0;
       const newInvoice: Invoice = {
         id: `inv${Date.now()}`, shopId: "s1", invoiceNo: `INV-${Math.floor(Math.random() * 9000) + 1000}`,
-        items, subtotal, discount, total, paidAmount, dueAmount,
-        paymentStatus: dueAmount > 0 ? (paidAmount > 0 ? "partial_due" : "full_due") : "paid",
-        customerId: null, customerName: data.CustomerName || null, customerPhone: data.CustomerPhone || null,
+        items, subtotal, discount: 0, total, paidAmount, dueAmount,
+        paymentStatus: "paid",
+        customerId: null, customerName: null, customerPhone: null,
         soldBy: "Current User", createdAt: new Date().toISOString()
       };
       return { sale: newInvoice, message: "Sale completed" };

@@ -29,13 +29,13 @@ export default function NewProductPage() {
     setLoading(true);
     try {
       await mockApi.products.create({
-        Name: form.name,
-        Barcode: form.sku,
-        SellPricePaisa: Math.round(Number(form.sellPrice) * 100),
-        Category: form.category,
-        Unit: form.unit,
-        CostPricePaisa: Math.round(Number(form.costPrice) * 100),
-        LowStockThreshold: Number(form.lowStockThreshold),
+        name: form.name,
+        sku: form.sku,
+        sellPrice: Math.round(Number(form.sellPrice) * 100),
+        costPrice: Math.round(Number(form.costPrice) * 100),
+        category: form.category,
+        unit: form.unit,
+        lowStockThreshold: Number(form.lowStockThreshold),
       });
       router.push("/shop/products");
     } catch (error) {

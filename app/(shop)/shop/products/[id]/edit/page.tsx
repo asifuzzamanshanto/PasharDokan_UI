@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { notFound, useRouter } from "next/navigation";
 import { mockApi } from "@/lib/api-mock";
 import { Product } from "@/types";
@@ -56,13 +56,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setSaving(true);
     try {
       await mockApi.products.update(id, {
-        Name: form.name,
-        Barcode: form.sku,
-        SellPricePaisa: Math.round(Number(form.sellPrice) * 100),
-        CostPricePaisa: Math.round(Number(form.costPrice) * 100),
-        Category: form.category,
-        Unit: form.unit,
-        LowStockThreshold: Number(form.lowStockThreshold),
+        name: form.name,
+        sku: form.sku,
+        sellPrice: Math.round(Number(form.sellPrice) * 100),
+        costPrice: Math.round(Number(form.costPrice) * 100),
+        category: form.category,
+        unit: form.unit,
+        lowStockThreshold: Number(form.lowStockThreshold),
       });
       router.push("/shop/products");
     } catch (error) {

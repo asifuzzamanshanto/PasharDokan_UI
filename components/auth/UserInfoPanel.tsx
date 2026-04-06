@@ -33,7 +33,7 @@ export function UserInfoPanel() {
         <div>
           <h3 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-1">Role</h3>
           <span className="inline-block bg-primary-100 text-primary-700 text-xs px-2 py-1 rounded font-medium">
-            {user.role === "platform_admin" ? "Platform Admin" : user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+            {user.role === "platform_admin" ? "Platform Admin" : user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "Unknown"}
           </span>
         </div>
         

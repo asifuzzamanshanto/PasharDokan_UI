@@ -12,7 +12,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 
 export default function ShopDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = params;
+  const { id } = use(params);
   const [shop, setShop] = useState<Shop | null>(null);
   const [loading, setLoading] = useState(true);
 

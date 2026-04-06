@@ -21,7 +21,7 @@ export function DemoSwitcher() {
   const handleSwitch = async (phone: string) => {
     setIsOpen(false);
     logout();
-    const success = await login(phone);
+    const success = await login(phone, "password");
     if (success) {
       if (phone === "01811111111") {
         router.push("/admin/dashboard");

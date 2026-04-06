@@ -6,26 +6,24 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const mockApi = {
   auth: {
-    login: async (email: string, _password: string) => {
+    login: async (data: { email: string; password: string; rememberMe?: boolean }) => {
       await delay(300);
-      const user = email.includes("admin") 
-        ? { id: "a1", name: "Platform Admin", phone: "01811111111", role: "platform_admin", shopId: null }
-        : { id: "u1", name: "Rahim Ahmed", phone: "01712345678", role: "owner", shopId: "s1", shopName: "Rahim Store", shopStatus: "active" as const };
-      return { token: "mock-token-123", user };
+      return { ok: true };
     },
-    register: async () => { await delay(300); return { message: "Registration successful" }; },
+    register: async (_data: { fullName: string; dob: string; nid: string; email: string; password: string; confirmPassword: string }) => { await delay(300); return { message: "Registration successful" }; },
     logout: async () => { await delay(100); return { message: "Logged out" }; },
+    me: async () => { await delay(100); return { userId: "u1", email: "demo@example.com", isAuthenticated: true }; },
   },
   shop: {
-    apply: async (data: { ShopName: string; OwnerName: string; OwnerPhone: string; OwnerEmail: string }) => {
+    apply: async (data: { shopName: string; address: string; ownerName: string; ownerPhone: string; ownerEmail: string }) => {
       await delay(500);
-      return { message: "Application submitted", applicationId: Math.floor(Math.random() * 1000) };
+      return { message: "Application submitted", applicationId: Math.floor(Math.random() * 1000), shopId: 123 };
     },
     context: async () => {
       await delay(200);
       return { 
         hasShop: true, 
-        ctx: { shopId: 1, role: "OWNER", shopStatus: "ACTIVE", canCreateDue: true, canCollectDue: true } 
+        ctx: { shopId: 1, role: "OWNER", shopStatus: "ACTIVE", shopName: "Rahim Store", canCreateDue: true, canCollectDue: true } 
       };
     },
     getMembers: async () => {
@@ -99,14 +97,13 @@ const mockApi = {
         }
       };
     },
-    create: async (data: { Items: { ProductId: number; Qty: number }[] }) => {
+    create: async (data: { items: { productId: number; qty: number }[] }) => {
       await delay(300);
-      const totalPaisa = data.Items.reduce((sum, item) => sum + (item.Qty * 6800), 0);
       return { 
         saleId: Math.floor(Math.random() * 10000), 
-        totalPaisa, 
+        totalPaisa: data.items.reduce((sum, item) => sum + (item.qty * 6800), 0), 
         createdAt: new Date().toISOString(),
-        items: data.Items.map(item => ({ productId: item.ProductId, qty: item.Qty, unitPricePaisa: 6800, totalPaisa: item.Qty * 6800 }))
+        items: data.items.map(item => ({ productId: item.productId, qty: item.qty, unitPricePaisa: 6800, totalPaisa: item.qty * 6800 }))
       };
     },
   },
@@ -264,7 +261,13 @@ const realApiWrapper = {
   },
   shop: {
     apply: (data: { shopName: string; address: string; ownerName: string; ownerPhone: string; ownerEmail: string }) =>
-      handleApiCall(() => api.shop.apply(data)),
+      handleApiCall(() => api.shop.apply({
+        ShopName: data.shopName,
+        Address: data.address,
+        OwnerName: data.ownerName,
+        OwnerPhone: data.ownerPhone,
+        OwnerEmail: data.ownerEmail,
+      } as any)),
     context: () => handleApiCall(() => api.shop.context()),
     getMembers: () => handleApiCall(() => api.shop.getMembers()),
     addMember: (data: { email: string; role: "SELLER" | "MANAGER"; canCreateDue: boolean; canCollectDue: boolean }) =>
@@ -289,7 +292,9 @@ const realApiWrapper = {
   },
   sales: {
     create: (data: { items: { productId: number; qty: number }[] }) =>
-      handleApiCall(() => api.sales.create(convertKeysToSnake(data) as Parameters<typeof api.sales.create>[0])),
+      handleApiCall(() => api.sales.create({
+        items: data.items.map(item => ({ ProductId: item.productId, Qty: item.qty })),
+      } as any)),
     list: () => handleApiCall(() => api.sales.list()),
     get: (id: number) => handleApiCall(() => api.sales.get(id)),
   },

@@ -1,7 +1,36 @@
+"use client";
+
 import Link from "next/link";
-import { SHOPS } from "@/lib/mock-data";
-import { SHOP_STATUS_LABELS, SHOP_STATUS_COLORS } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
+
+interface Shop {
+  id: string;
+  name: string;
+  nameBn: string;
+  city: string;
+  status: string;
+  appliedAt: string;
+  verifiedAt: string | null;
+}
+
+const SHOPS: Shop[] = [
+  { id: "s3", name: "Karim Bhai Shop", nameBn: "করিম ভাই শপ", city: "Dhaka", status: "pending", appliedAt: "2026-03-28", verifiedAt: null },
+  { id: "s4", name: "Shapla Store", nameBn: "শাপলা স্টোর", city: "Dhaka", status: "verified", appliedAt: "2026-03-15", verifiedAt: "2026-03-20" },
+];
+
+const SHOP_STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  verified: "Verified",
+  active: "Active",
+  suspended: "Suspended",
+};
+
+const SHOP_STATUS_COLORS: Record<string, string> = {
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  verified: "bg-blue-50 text-blue-700 border-blue-200",
+  active: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  suspended: "bg-red-50 text-red-700 border-red-200",
+};
 
 export default function ApplicationStatusPage() {
   const pendingShops = SHOPS.filter((s) => s.status === "pending" || s.status === "verified");
@@ -35,7 +64,6 @@ export default function ApplicationStatusPage() {
                 </div>
               )}
             </div>
-            {/* Progress steps */}
             <div className="flex items-center gap-2 mt-4">
               {["Applied", "Verified", "Active"].map((step, i) => {
                 const done = shop.status === "active" || (i === 0) || (i === 1 && shop.status === "verified");

@@ -32,7 +32,7 @@ export default function ApplyPage() {
         ownerName: form.ownerName,
         ownerPhone: form.ownerPhone,
         ownerEmail: form.ownerEmail,
-      }) as { shopId: number };
+      });
       
       setApplicationId(result.shopId);
       setSubmitted(true);

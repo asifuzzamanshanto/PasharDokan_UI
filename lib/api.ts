@@ -64,7 +64,13 @@ export const api = {
       ownerName: string;
       ownerPhone: string;
       ownerEmail: string;
-    }) => fetchApi<{ shopId: number }>("/shop/apply", { method: "POST", body: data }),
+    }) => fetchApi<{ shopId: number; applicationId?: number }>("/shop/apply", { method: "POST", body: {
+      ShopName: data.shopName,
+      Address: data.address,
+      OwnerName: data.ownerName,
+      OwnerPhone: data.ownerPhone,
+      OwnerEmail: data.ownerEmail,
+    } }),
 
     context: () =>
       fetchApi<{
@@ -73,6 +79,7 @@ export const api = {
           shopId: number;
           role: string;
           shopStatus: string;
+          shopName?: string;
           canCreateDue: boolean;
           canCollectDue: boolean;
         };
@@ -201,7 +208,7 @@ export const api = {
           unitPricePaisa: number;
           totalPaisa: number;
         }[];
-      }>("/sales", { method: "POST", body: data }),
+      }>("/sales", { method: "POST", body: { Items: data.items.map(i => ({ ProductId: i.productId, Qty: i.qty })) } }),
 
     list: () =>
       fetchApi<
