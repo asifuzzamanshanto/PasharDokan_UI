@@ -13,18 +13,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
   }
   
-  console.log(`[API Proxy] POST ${endpoint}`, body);
+  console.log(`[API Proxy] POST ${endpoint}`, JSON.stringify(body));
   
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (fetchError: any) {
+    console.log(`[API Proxy] Fetch error:`, fetchError.message);
+    return NextResponse.json({ message: "Backend unavailable: " + fetchError.message }, { status: 502 });
+  }
 
   const data = await response.json();
-  console.log(`[API Proxy] Response:`, response.status, data);
+  console.log(`[API Proxy] Response status:`, response.status, JSON.stringify(data));
   return NextResponse.json(data, { status: response.status });
 }
 
@@ -34,15 +40,21 @@ export async function GET(request: Request) {
   
   console.log(`[API Proxy] GET ${endpoint}`);
   
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (fetchError: any) {
+    console.log(`[API Proxy] Fetch error:`, fetchError.message);
+    return NextResponse.json({ message: "Backend unavailable: " + fetchError.message }, { status: 502 });
+  }
 
   const data = await response.json();
-  console.log(`[API Proxy] Response:`, response.status, data);
+  console.log(`[API Proxy] Response status:`, response.status);
   return NextResponse.json(data, { status: response.status });
 }
 
