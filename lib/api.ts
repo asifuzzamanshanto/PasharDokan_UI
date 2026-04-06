@@ -1,4 +1,4 @@
-const API_BASE = "/api/proxy";
+const API_BASE = "";
 
 interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
@@ -46,15 +46,15 @@ export const api = {
       email: string;
       password: string;
       confirmPassword: string;
-    }) => fetchApi<{ ok: boolean }>("/api/auth/register", { method: "POST", body: data }),
+    }) => fetchApi<{ ok: boolean }>("/auth/register", { method: "POST", body: data }),
 
     login: (data: { email: string; password: string; rememberMe?: boolean }) =>
-      fetchApi<{ ok: boolean }>("/api/auth/login", { method: "POST", body: data }),
+      fetchApi<{ ok: boolean }>("/auth/login", { method: "POST", body: data }),
 
-    logout: () => fetchApi<{ ok: boolean }>("/api/auth/logout", { method: "POST" }),
+    logout: () => fetchApi<{ ok: boolean }>("/auth/logout", { method: "POST" }),
 
     me: () =>
-      fetchApi<{ userId: string; email: string; isAuthenticated: boolean }>("/api/me"),
+      fetchApi<{ userId: string; email: string; isAuthenticated: boolean }>("/me"),
   },
 
   shop: {
@@ -64,7 +64,7 @@ export const api = {
       ownerName: string;
       ownerPhone: string;
       ownerEmail: string;
-    }) => fetchApi<{ shopId: number; applicationId?: number }>("/api/shop/apply", { method: "POST", body: {
+    }) => fetchApi<{ shopId: number; applicationId?: number }>("/shop/apply", { method: "POST", body: {
       ShopName: data.shopName,
       Address: data.address,
       OwnerName: data.ownerName,
@@ -83,7 +83,7 @@ export const api = {
           canCreateDue: boolean;
           canCollectDue: boolean;
         };
-      }>("/api/shop/context"),
+      }>("/shop/context"),
 
     getMembers: () =>
       fetchApi<
@@ -97,17 +97,17 @@ export const api = {
           isActive: boolean;
           createdAt: string;
         }[]
-      >("/api/shop/members"),
+      >("/shop/members"),
 
     addMember: (data: {
       email: string;
       role: "SELLER" | "MANAGER";
       canCreateDue: boolean;
       canCollectDue: boolean;
-    }) => fetchApi<{ ok: boolean }>("/api/shop/members", { method: "POST", body: data }),
+    }) => fetchApi<{ ok: boolean }>("/shop/members", { method: "POST", body: data }),
 
     removeMember: (id: number) =>
-      fetchApi<{ ok: boolean }>(`/api/shop/members/${id}/remove`, { method: "POST" }),
+      fetchApi<{ ok: boolean }>(`/shop/members/${id}/remove`, { method: "POST" }),
   },
 
   products: {
@@ -121,7 +121,7 @@ export const api = {
           isActive: boolean;
           currentQty: number;
         }[]
-      >(`/api/products${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+      >(`/products${q ? `?q=${encodeURIComponent(q)}` : ""}`),
 
     get: (id: number) =>
       fetchApi<{
@@ -135,13 +135,13 @@ export const api = {
         lowStockThreshold: number;
         currentQty: number;
         isActive: boolean;
-      }>(`/api/products/${id}`),
+      }>(`/products/${id}`),
 
     create: (data: {
       name: string;
       barcode: string;
       sellPricePaisa: number;
-    }) => fetchApi<{ productId: number }>("/api/products", { method: "POST", body: data }),
+    }) => fetchApi<{ productId: number }>("/products", { method: "POST", body: data }),
 
     update: (
       id: number,
@@ -155,13 +155,13 @@ export const api = {
         lowStockThreshold?: number;
       }
     ) =>
-      fetchApi<{ productId: number; ok: boolean }>(`/api/products/${id}`, {
+      fetchApi<{ productId: number; ok: boolean }>(`/products/${id}`, {
         method: "PUT",
         body: data,
       }),
 
     toggleActive: (id: number, active: boolean) =>
-      fetchApi<{ ok: boolean }>(`/api/products/${id}/active`, {
+      fetchApi<{ ok: boolean }>(`/products/${id}/active`, {
         method: "POST",
         body: { active },
       }),
@@ -173,13 +173,13 @@ export const api = {
       qty: number;
       unitCostPaisa: number;
       note?: string;
-    }) => fetchApi<{ ok: boolean }>("/api/inventory/in", { method: "POST", body: data }),
+    }) => fetchApi<{ ok: boolean }>("/inventory/in", { method: "POST", body: data }),
 
     adjust: (data: {
       productId: number;
       qtyChange: number;
       note?: string;
-    }) => fetchApi<{ ok: boolean }>("/api/inventory/adjust", { method: "POST", body: data }),
+    }) => fetchApi<{ ok: boolean }>("/inventory/adjust", { method: "POST", body: data }),
 
     ledger: (productId?: number, take = 50) =>
       fetchApi<
@@ -193,7 +193,7 @@ export const api = {
           note: string;
           createdAt: string;
         }[]
-      >(`/api/inventory/ledger?productId=${productId}&take=${take}`),
+      >(`/inventory/ledger?productId=${productId}&take=${take}`),
   },
 
   sales: {
@@ -208,7 +208,7 @@ export const api = {
           unitPricePaisa: number;
           totalPaisa: number;
         }[];
-      }>("/api/sales", { method: "POST", body: { Items: data.items.map(i => ({ ProductId: i.productId, Qty: i.qty })) } }),
+      }>("/sales", { method: "POST", body: { Items: data.items.map(i => ({ ProductId: i.productId, Qty: i.qty })) } }),
 
     list: () =>
       fetchApi<
@@ -223,7 +223,7 @@ export const api = {
             totalPaisa: number;
           }[];
         }[]
-      >("/api/sales"),
+      >("/sales"),
 
     get: (id: number) =>
       fetchApi<{
@@ -246,7 +246,7 @@ export const api = {
         customerPhone: string | null;
         soldBy: number;
         createdAt: string;
-      }>(`/api/sales/${id}`),
+      }>(`/sales/${id}`),
   },
 
   reports: {
@@ -258,7 +258,7 @@ export const api = {
         collectionRate: number;
         todaySales: number;
         invoiceCount: number;
-      }>("/api/reports/sales-summary"),
+      }>("/reports/sales-summary"),
 
     topProducts: (limit = 10) =>
       fetchApi<
@@ -268,12 +268,12 @@ export const api = {
           quantity: number;
           revenue: number;
         }[]
-      >(`/api/reports/top-products?limit=${limit}`),
+      >(`/reports/top-products?limit=${limit}`),
 
     categoryDistribution: () =>
       fetchApi<
         { category: string; count: number; percentage: number }[]
-      >("/api/reports/category-distribution"),
+      >("/reports/category-distribution"),
   },
 
   due: {
@@ -289,7 +289,7 @@ export const api = {
           createdAt: string;
           updatedAt: string;
         }[]
-      >(`/api/shops/${shopId}/dues/customers`),
+      >(`/shops/${shopId}/dues/customers`),
 
     createCustomer: (
       shopId: number,
@@ -301,7 +301,7 @@ export const api = {
         name: string;
         phoneNumber: string;
         address: string;
-      }>(`/api/shops/${shopId}/dues/customers`, { method: "POST", body: data }),
+      }>(`/shops/${shopId}/dues/customers`, { method: "POST", body: data }),
 
     getEntries: (shopId: number, customerId: string) =>
       fetchApi<
@@ -314,7 +314,7 @@ export const api = {
           remarks: string;
           createdAt: string;
         }[]
-      >(`/api/shops/${shopId}/dues/customers/${customerId}/entries`),
+      >(`/shops/${shopId}/dues/customers/${customerId}/entries`),
 
     createEntry: (
       shopId: number,
@@ -333,7 +333,7 @@ export const api = {
         entryType: string;
         remarks: string;
         createdAt: string;
-      }>(`/api/shops/${shopId}/dues/customers/${customerId}/entries`, {
+      }>(`/shops/${shopId}/dues/customers/${customerId}/entries`, {
         method: "POST",
         body: data,
       }),
@@ -347,7 +347,7 @@ export const api = {
         pendingApplications: number;
         suspendedShops: number;
         totalPlatformRevenue: number;
-      }>("/api/admin/dashboard"),
+      }>("/admin/dashboard"),
 
     getShopApplications: () =>
       fetchApi<
@@ -360,7 +360,7 @@ export const api = {
           address: string;
           createdAt: string;
         }[]
-      >("/api/admin/shop-applications/pending"),
+      >("/admin/shop-applications/pending"),
 
     getShops: () =>
       fetchApi<
@@ -372,15 +372,15 @@ export const api = {
           address: string;
           verifiedAt: string;
         }[]
-      >("/api/admin/shops"),
+      >("/admin/shops"),
 
     approveShop: (id: number) =>
-      fetchApi<{ ok: boolean }>(`/api/admin/shop-applications/${id}/approve`, {
+      fetchApi<{ ok: boolean }>(`/admin/shop-applications/${id}/approve`, {
         method: "POST",
       }),
 
     rejectShop: (id: number) =>
-      fetchApi<{ ok: boolean }>(`/api/admin/shop-applications/${id}/reject`, {
+      fetchApi<{ ok: boolean }>(`/admin/shop-applications/${id}/reject`, {
         method: "POST",
       }),
   },
