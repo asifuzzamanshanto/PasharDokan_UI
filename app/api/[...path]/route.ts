@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://pashardokan-api.onrender.com/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://pashardokan-api.onrender.com";
 
 export async function POST(request: Request) {
   const { pathname } = new URL(request.url);
