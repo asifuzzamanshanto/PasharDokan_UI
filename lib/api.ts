@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://pashardokan-api.onrender.com/api";
 
 interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
