@@ -6,13 +6,24 @@ export async function POST(request: Request) {
   const { pathname } = new URL(request.url);
   const endpoint = pathname;
   
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ message: "Invalid request body" }, { status: 400 });
+  }
   
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    console.error("Proxy fetch error:", error);
+    return NextResponse.json({ message: "Backend unavailable" }, { status: 502 });
+  }
 
   const data = await response.json();
   return NextResponse.json(data, { status: response.status });
@@ -22,7 +33,14 @@ export async function GET(request: Request) {
   const { pathname, search } = new URL(request.url);
   const endpoint = pathname + search;
   
-  const response = await fetch(`${API_BASE}${endpoint}`);
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`);
+  } catch (error) {
+    console.error("Proxy fetch error:", error);
+    return NextResponse.json({ message: "Backend unavailable" }, { status: 502 });
+  }
+  
   const data = await response.json();
   return NextResponse.json(data, { status: response.status });
 }
@@ -31,13 +49,24 @@ export async function PUT(request: Request) {
   const { pathname } = new URL(request.url);
   const endpoint = pathname;
   
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ message: "Invalid request body" }, { status: 400 });
+  }
   
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    console.error("Proxy fetch error:", error);
+    return NextResponse.json({ message: "Backend unavailable" }, { status: 502 });
+  }
 
   const data = await response.json();
   return NextResponse.json(data, { status: response.status });
@@ -47,7 +76,14 @@ export async function DELETE(request: Request) {
   const { pathname } = new URL(request.url);
   const endpoint = pathname;
   
-  const response = await fetch(`${API_BASE}${endpoint}`, { method: "DELETE" });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, { method: "DELETE" });
+  } catch (error) {
+    console.error("Proxy fetch error:", error);
+    return NextResponse.json({ message: "Backend unavailable" }, { status: 502 });
+  }
+  
   const data = await response.json();
   return NextResponse.json(data, { status: response.status });
 }
